@@ -1,0 +1,7 @@
+[project]
+name = "tennis-courts"
+version = "0.1.0"
+description = "Tennis court reservation system"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = ["django"]
