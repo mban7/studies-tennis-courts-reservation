@@ -28,7 +28,7 @@ class AuthView(ViewSet):
         )
 
         response = Response({"detail": "ok"})
-        print(data)
+
         response.set_cookie(
             "access_token",
             data["access"],
