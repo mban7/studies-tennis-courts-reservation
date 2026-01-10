@@ -5,6 +5,8 @@ from rest_framework.viewsets import ViewSet
 
 from .serializers import LoginSerializer
 from .services import login_user
+from ..core.serializers import MessageSerializer
+
 
 class AuthView(ViewSet):
     authentication_classes = []
@@ -12,7 +14,7 @@ class AuthView(ViewSet):
 
     @extend_schema(
         request=LoginSerializer,
-        responses={200},
+        responses={200: MessageSerializer},
         summary="Login user",
     )
     @action(detail=False, methods=["post"], url_path="login")
@@ -26,7 +28,7 @@ class AuthView(ViewSet):
         )
 
         response = Response({"detail": "ok"})
-
+        print(data)
         response.set_cookie(
             "access_token",
             data["access"],
@@ -51,10 +53,14 @@ class AuthView(ViewSet):
 
     @extend_schema(
         request=None,
-        responses={200},
+        responses={200: MessageSerializer},
         summary="Logout",
     )
     @action(detail=False, methods=["post"], url_path="logout")
     def logout(self, request):
-        pass
+        response = Response({"detail": "ok"})
+
+        response.delete_cookie("access_token", path="/api")
+        response.delete_cookie("refresh_token", path="/auth/refresh")
+        return response
 
