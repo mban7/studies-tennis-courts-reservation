@@ -1,4 +1,5 @@
 from rest_framework import serializers
 
-class MessageSerializer(serializers.Serializer):
-    message = serializers.CharField()
+class ApiResponseSerializer(serializers.Serializer):
+    message = serializers.CharField(required=False)
+    data = serializers.JSONField(required=False)

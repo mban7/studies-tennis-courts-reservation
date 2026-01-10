@@ -8,7 +8,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import LoginSerializer
 from .services import login_user
-from ..core.serializers import MessageSerializer
+from apps.core.serializers import ApiResponseSerializer
+from ..core.responses import api_response
 
 
 class AuthView(ViewSet):
@@ -17,7 +18,7 @@ class AuthView(ViewSet):
 
     @extend_schema(
         request=LoginSerializer,
-        responses={200: MessageSerializer},
+        responses={200: ApiResponseSerializer},
         summary="Login user",
     )
     @action(detail=False, methods=["post"], url_path="login")
@@ -30,7 +31,7 @@ class AuthView(ViewSet):
             **serializer.validated_data
         )
 
-        response = Response({"detail": "ok"})
+        response = api_response(message="ok")
 
         response.set_cookie(
             "access_token",
@@ -56,12 +57,12 @@ class AuthView(ViewSet):
 
     @extend_schema(
         request=None,
-        responses={200: MessageSerializer},
+        responses={200: ApiResponseSerializer},
         summary="Logout",
     )
     @action(detail=False, methods=["post"], url_path="logout")
     def logout(self, request):
-        response = Response({"detail": "ok"})
+        response = api_response(message="ok")
 
         response.delete_cookie("access_token", path="/api")
         response.delete_cookie("refresh_token", path="/auth/refresh")
@@ -69,7 +70,7 @@ class AuthView(ViewSet):
 
     @extend_schema(
         request=None,
-        responses={200: MessageSerializer},
+        responses={200: ApiResponseSerializer},
         summary="Refresh token",
     )
     @action(detail=False, methods=["post"], url_path="refresh")
@@ -87,7 +88,7 @@ class AuthView(ViewSet):
         new_access_token = token.access_token
         new_refresh_token = token
 
-        response = Response({"detail": "ok"})
+        response = api_response(message="ok")
 
         response.set_cookie(
             "access_token",

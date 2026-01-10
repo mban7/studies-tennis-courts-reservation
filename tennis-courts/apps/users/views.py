@@ -12,6 +12,8 @@ from apps.users.serializers import (
     AdminCreateSerializer
 )
 from apps.core.permissions import IsAdmin
+from apps.core.responses import api_response
+from apps.core.serializers import ApiResponseSerializer
 
 
 class UserView(ViewSet):
@@ -33,9 +35,10 @@ class UserView(ViewSet):
         return [IsAuthenticated()]
     @extend_schema(
         request=UserCreateSerializer,
-        responses={201: UserReadSerializer},
+        responses={201: ApiResponseSerializer},
         summary="Register User",
-        description="Create new user account"
+        description="Create new user account",
+        tags=["users"],
     )
     @action(detail=False, methods=['post'], url_path='user')
     def register(self, request):
@@ -43,16 +46,18 @@ class UserView(ViewSet):
         serializer.is_valid(raise_exception=True)
         user = self.service.create_user(**serializer.validated_data)
 
-        return Response(
-            UserReadSerializer(user).data,
-            status=status.HTTP_201_CREATED
+        return api_response(
+            data=UserReadSerializer(user).data,
+            message="User created successfully",
+            status_code=status.HTTP_201_CREATED
         )
 
     @extend_schema(
         request=AdminCreateSerializer,
-        responses={201: UserReadSerializer},
+        responses={201: ApiResponseSerializer},
         summary="Create Admin User",
-        description="Create new admin user account - requires admin authentication"
+        description="Create new admin user account - requires admin authentication",
+        tags=["users"],
     )
     @action(detail=False, methods=['post'], url_path='admin')
     def register_admin(self, request):
@@ -62,17 +67,19 @@ class UserView(ViewSet):
         user_data = serializer.validated_data.copy()
         user = self.service.create_admin(**user_data)
 
-        return Response(
-            UserReadSerializer(user).data,
-            status=status.HTTP_201_CREATED
+        return api_response(
+            data=UserReadSerializer(user).data,
+            message="Admin created successfully",
+            status_code=status.HTTP_201_CREATED
         )
 
     @extend_schema(
         request=None,
-        responses={200: UserReadSerializer},
+        responses={200: ApiResponseSerializer},
         summary="Get user by his email",
+        tags=["users"],
     )
-    @action(detail=False, methods=['get'], url_path='profile')
+    @action(detail=True, methods=['get'], url_path='profile')
     def profile(self, request, pk=None):
         user = self.service.get_user(user_id=pk)
 
@@ -83,23 +90,25 @@ class UserView(ViewSet):
 
     @extend_schema(
         request=None,
-        responses={200: UserReadSerializer},
+        responses={200: ApiResponseSerializer},
         summary="Deactivate user",
-        description="Deactivate user account by UUID"
+        description="Deactivate user account by UUID",
+        tags=["users"],
     )
     @action(detail=True, methods=['delete'], url_path='deactivate')
     def deactivate(self, request, pk=None):
-        user = self.service.deactivate_user(user_id=pk)
-        return Response(
-            UserReadSerializer(user).data,
-            status=status.HTTP_200_OK
+        self.service.deactivate_user(user_id=pk)
+        return api_response(
+            message="User deactivated successfully",
+            status_code=status.HTTP_200_OK
         )
 
     @extend_schema(
         request=UserUpdateSerializer,
-        responses={200: UserReadSerializer},
+        responses={200: ApiResponseSerializer},
         summary="Update user",
-        description="Update user information by UUID"
+        description="Update user information by UUID",
+        tags=["users"],
     )
     @action(detail=True, methods=['patch'], url_path='update')
     def update_user(self, request, pk=None):
@@ -112,7 +121,7 @@ class UserView(ViewSet):
             **update_serializer.validated_data
         )
 
-        return Response(
-            UserReadSerializer(user).data,
-            status=status.HTTP_200_OK
+        return api_response(
+            data=UserReadSerializer(user).data,
+            message="User updated successfully"
         )
