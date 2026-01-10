@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'rest_framework',
+    'rest_framework_simplejwt',
     'drf_spectacular',
     'apps.courts',
     'apps.reservations',
@@ -43,6 +45,7 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.admin',
     'apps.emails',
+    'apps.auth_service'
 ]
 
 MIDDLEWARE = [
@@ -72,17 +75,24 @@ TEMPLATES = [
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     'DEFAULT_AUTHENTICATION_CLASSES': (
-            'rest_framework_simplejwt.authentication.JWTAuthentication',
+            'apps.auth_service.auth.CookieJWTAuth',
         ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
 
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "Tennis Courts API",
     "DESCRIPTION": "REST API for tennis court reservations",
     "VERSION": "0.0.1",
+    "SECURITY": [{"CookieJWTAuth": []}]
 }
 
 WSGI_APPLICATION = 'tennis_courts.wsgi.application'
