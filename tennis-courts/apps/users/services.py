@@ -1,13 +1,12 @@
 from uuid import UUID
 
 from django.db import transaction
-from django.shortcuts import get_object_or_404
 from apps.users.models import User
 
 class UserService:
     @staticmethod
     def get_user(*, user_id: UUID) -> User:
-        return get_object_or_404(User, id=user_id)
+        return User.objects.get(id=user_id)
 
     @staticmethod
     @transaction.atomic
@@ -35,7 +34,7 @@ class UserService:
     @staticmethod
     @transaction.atomic
     def deactivate_user(*, user_id: UUID) -> User:
-        user = get_object_or_404(User, id=user_id)
+        user = User.objects.get(id=user_id)
 
         if not user.is_active:
             return user
@@ -47,7 +46,7 @@ class UserService:
     @staticmethod
     @transaction.atomic
     def update_user(*, user_id: UUID, email: str = None, first_name: str = None, last_name: str = None) -> User:
-        user = get_object_or_404(User, id=user_id)
+        user = User.objects.get(id=user_id)
         update_fields = []
 
         if email is not None:
