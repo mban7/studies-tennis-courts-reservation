@@ -112,7 +112,6 @@ class UserView(ViewSet):
     )
     @action(detail=True, methods=['patch'], url_path='update')
     def update_user(self, request, pk=None):
-        # pk comes from URL path parameter, already validated by DRF
         update_serializer = UserUpdateSerializer(data=request.data, partial=True)
         update_serializer.is_valid(raise_exception=True)
 
