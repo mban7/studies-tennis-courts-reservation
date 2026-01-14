@@ -10,6 +10,8 @@ from .serializers import LoginSerializer
 from .services import login_user
 from apps.core.serializers import ApiResponseSerializer
 from ..core.responses import api_response
+from ..users.serializers import UserCreateSerializer, UserReadSerializer
+from ..users.services import UserService
 
 
 class AuthView(ViewSet):
@@ -17,9 +19,27 @@ class AuthView(ViewSet):
     permission_classes = []
 
     @extend_schema(
+        request=UserCreateSerializer,
+        responses={200: ApiResponseSerializer},
+        summary="Register",
+        description="Register a new user account",
+    )
+    @action(detail=False, methods=["post"], url_path="register")
+    def register(self, request):
+        serializer = UserCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        UserService().create_user(**serializer.validated_data)
+
+        return api_response(
+            message="User registered successfully",
+            status_code=200
+        )
+
+    @extend_schema(
         request=LoginSerializer,
         responses={200: ApiResponseSerializer},
-        summary="Login user",
+        summary="Login",
     )
     @action(detail=False, methods=["post"], url_path="login")
     def login(self, request):

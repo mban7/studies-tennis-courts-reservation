@@ -9,7 +9,8 @@ class CourtService:
         return Court.objects.get(pk=court_id)
 
     @staticmethod
-    def get_courts():
+    def get_courts() -> list[Court]:
         return Court.objects.all()
 
-
+    @staticmethod
+    def create_court(court_data: dict) -> Court:

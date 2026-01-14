@@ -10,25 +10,23 @@ class UserService:
 
     @staticmethod
     @transaction.atomic
-    def create_user(*, email: str, password: str) -> User:
-        return User.objects.create_user(
-            email=email,
-            password=password,
-        )
+    def create_user(*, email: str, password: str, role: str = None, first_name: str = None, last_name: str = None) -> User:
+        user_data = {}
 
-    @staticmethod
-    @transaction.atomic
-    def create_admin(*, email: str, password: str, first_name: str = None, last_name: str = None) -> User:
-        user = UserService.create_user(email=email, password=password)
-        user.role=User.Role.ADMIN
+        if role:
+            user_data['role'] = role
 
         if first_name:
-            user.first_name=first_name
+            user_data['first_name'] = first_name
+
         if last_name:
-            user.last_name=last_name
+            user_data['last_name'] = last_name
 
-        user.save(update_fields=["role"])
-
+        user = User.objects.create_user(
+            email=email,
+            password=password,
+            **user_data
+        )
         return user
 
     @staticmethod
