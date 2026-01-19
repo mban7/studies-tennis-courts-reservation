@@ -21,7 +21,7 @@ class AuthView(ViewSet):
     def get_permissions(self):
         if self.action in {"login", "register"}:
             return [AllowAny()]
-        if self.action in {"me", "refresh", "logout"}:
+        if self.action in {"me", "logout"}:
             return [IsAuthenticated()]
         return [AllowAny()]
 
@@ -152,7 +152,6 @@ class AuthView(ViewSet):
             secure=False,
             samesite="Lax",
             max_age=300,
-            path="/api"
         )
 
         response.set_cookie(
