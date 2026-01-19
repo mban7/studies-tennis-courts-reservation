@@ -32,7 +32,7 @@ class UserView(ViewSet):
 
     @extend_schema(
         request=UserCreateWithRoleSerializer,
-        responses={201: ApiResponseSerializer},
+        responses={200: ApiResponseSerializer},
         summary="Create User",
         description="Create new user",
         tags=["users"],
@@ -47,7 +47,7 @@ class UserView(ViewSet):
         return api_response(
             data=UserReadSerializer(user).data,
             message="User created successfully",
-            status_code=status.HTTP_201_CREATED
+            status_code=status.HTTP_200_OK
         )
 
     @extend_schema(
