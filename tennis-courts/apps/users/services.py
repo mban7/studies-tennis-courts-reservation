@@ -9,6 +9,10 @@ class UserService:
         return User.objects.get(id=user_id)
 
     @staticmethod
+    def get_users() ->list[User]:
+        return list(User.objects.all())
+
+    @staticmethod
     @transaction.atomic
     def create_user(*, email: str, password: str, role: str = None, first_name: str = None, last_name: str = None) -> User:
         user_data = {}

@@ -23,7 +23,7 @@ class UserView(ViewSet):
         return UserService()
 
     def get_permissions(self):
-        admin_actions = {"create_user", "update_user", "deactivate", "profile"}
+        admin_actions = {"create_user", "update_user", "deactivate", "get_user", "get_users"}
 
         if self.action in admin_actions:
             return [IsAdmin()]
@@ -56,13 +56,31 @@ class UserView(ViewSet):
         summary="Get user information",
         tags=["users"],
     )
-    @action(detail=True, methods=['get'], url_path='profile')
-    def profile(self, request, pk=None):
+    @action(detail=True, methods=['get'], url_path='get')
+    def get_user(self, request, pk=None):
         user = self.service.get_user(user_id=pk)
 
-        return Response(
-            UserReadSerializer(user).data,
-            status=status.HTTP_200_OK
+        return api_response(
+            data=UserReadSerializer(user).data,
+            message="User retrieved successfully",
+            status_code=status.HTTP_200_OK
+        )
+
+    @extend_schema(
+        request=None,
+        responses={200: ApiResponseSerializer},
+        summary="Get users information",
+        tags=["users"],
+    )
+    @action(detail=False, methods=['get'], url_path='get')
+    def get_users(self, request):
+        user = self.service.get_users()
+        serializer = UserReadSerializer(user, many=True)
+
+        return api_response(
+            data=serializer.data,
+            message="Users retrieved successfully",
+            status_code=status.HTTP_200_OK
         )
 
     @extend_schema(
