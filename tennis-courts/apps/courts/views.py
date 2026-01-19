@@ -20,12 +20,45 @@ class CourtView(ViewSet):
         return CourtService()
 
     def get_permissions(self):
-        admin_actions = {}
+        admin_actions = {"create_court"}
 
         if self.action in admin_actions:
             return [IsAdmin()]
 
         return [IsAuthenticated()]
+
+    @extend_schema(
+        request=None,
+        responses={200: ApiResponseSerializer},
+        summary="Get court",
+        tags=["courts"],
+    )
+    @action(detail=True, methods=["get"], url_path="get")
+    def get_court(self, request, pk=None):
+        court = self.service.get_court(pk)
+
+        return api_response(
+            data=CourtReadSerializer(court).data,
+            message="Court retrieved successfully",
+            status_code=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        request=None,
+        responses={200: ApiResponseSerializer},
+        summary="Get courts",
+        tags=["courts"],
+    )
+    @action(detail=False, methods=["get"], url_path="get")
+    def get_courts(self, request):
+        courts = self.service.get_courts()
+        serializer = CourtReadSerializer(courts, many=True)
+
+        return api_response(
+            data=serializer.data,
+            message="Court retrieved successfully",
+            status_code=status.HTTP_200_OK,
+        )
 
     @extend_schema(
         request=CourtCreateSerializer,
