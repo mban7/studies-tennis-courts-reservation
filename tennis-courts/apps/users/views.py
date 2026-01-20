@@ -2,14 +2,13 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 
 from drf_spectacular.utils import extend_schema
 
 from apps.users.services import UserService
 from apps.users.serializers import (
-    UserReadSerializer, UserCreateSerializer, UserUpdateSerializer,
-    AdminCreateSerializer
+    UserReadSerializer, UserCreateWithRoleSerializer, UserUpdateSerializer
 )
 from apps.core.permissions import IsAdmin
 from apps.core.responses import api_response
@@ -24,75 +23,71 @@ class UserView(ViewSet):
         return UserService()
 
     def get_permissions(self):
-        public_actions = {"register"}
-        admin_actions = {"register_admin"}
+        admin_actions = {"create_user", "update_user", "deactivate", "get_user", "get_users"}
 
-        if self.action == "register":
-            return [AllowAny()]
-        elif self.action == "register_admin":
+        if self.action in admin_actions:
             return [IsAdmin()]
 
         return [IsAuthenticated()]
+
     @extend_schema(
-        request=UserCreateSerializer,
-        responses={201: ApiResponseSerializer},
-        summary="Register User",
-        description="Create new user account",
+        request=UserCreateWithRoleSerializer,
+        responses={200: ApiResponseSerializer},
+        summary="Create User",
+        description="Create new user",
         tags=["users"],
     )
-    @action(detail=False, methods=['post'], url_path='user')
-    def register(self, request):
-        serializer = UserCreateSerializer(data=request.data)
+    @action(detail=False, methods=['post'], url_path='create')
+    def create_user(self, request):
+        serializer = UserCreateWithRoleSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         user = self.service.create_user(**serializer.validated_data)
 
         return api_response(
             data=UserReadSerializer(user).data,
             message="User created successfully",
-            status_code=status.HTTP_201_CREATED
-        )
-
-    @extend_schema(
-        request=AdminCreateSerializer,
-        responses={201: ApiResponseSerializer},
-        summary="Create Admin User",
-        description="Create new admin user account - requires admin authentication",
-        tags=["users"],
-    )
-    @action(detail=False, methods=['post'], url_path='admin')
-    def register_admin(self, request):
-        serializer = AdminCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user_data = serializer.validated_data.copy()
-        user = self.service.create_admin(**user_data)
-
-        return api_response(
-            data=UserReadSerializer(user).data,
-            message="Admin created successfully",
-            status_code=status.HTTP_201_CREATED
+            status_code=status.HTTP_200_OK
         )
 
     @extend_schema(
         request=None,
         responses={200: ApiResponseSerializer},
-        summary="Get user by his email",
+        summary="Get user information",
         tags=["users"],
     )
-    @action(detail=True, methods=['get'], url_path='profile')
-    def profile(self, request, pk=None):
+    @action(detail=True, methods=['get'], url_path='get')
+    def get_user(self, request, pk=None):
         user = self.service.get_user(user_id=pk)
 
-        return Response(
-            UserReadSerializer(user).data,
-            status=status.HTTP_200_OK
+        return api_response(
+            data=UserReadSerializer(user).data,
+            message="User retrieved successfully",
+            status_code=status.HTTP_200_OK
+        )
+
+    @extend_schema(
+        request=None,
+        responses={200: ApiResponseSerializer},
+        summary="Get users information",
+        tags=["users"],
+    )
+    @action(detail=False, methods=['get'], url_path='get')
+    def get_users(self, request):
+        user = self.service.get_users()
+        serializer = UserReadSerializer(user, many=True)
+
+        return api_response(
+            data=serializer.data,
+            message="Users retrieved successfully",
+            status_code=status.HTTP_200_OK
         )
 
     @extend_schema(
         request=None,
         responses={200: ApiResponseSerializer},
         summary="Deactivate user",
-        description="Deactivate user account by UUID",
+        description="Deactivate user account",
         tags=["users"],
     )
     @action(detail=True, methods=['delete'], url_path='deactivate')
@@ -107,7 +102,7 @@ class UserView(ViewSet):
         request=UserUpdateSerializer,
         responses={200: ApiResponseSerializer},
         summary="Update user",
-        description="Update user information by UUID",
+        description="Update user information",
         tags=["users"],
     )
     @action(detail=True, methods=['patch'], url_path='update')

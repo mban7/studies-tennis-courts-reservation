@@ -20,13 +20,19 @@ class UserCreateSerializer(serializers.ModelSerializer):
             'password': {'write_only': True}
         }
 
-class AdminCreateSerializer(serializers.ModelSerializer):
+class UserCreateWithRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["email", "password", "first_name", "last_name"]
+        fields = ["email", "password", "role", "first_name", "last_name"]
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
+    def validate_role(self, value):
+        if value not in [User.Role.USER, User.Role.ADMIN]:
+            raise serializers.ValidationError("Invalid role selected.")
+        return value
+
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
