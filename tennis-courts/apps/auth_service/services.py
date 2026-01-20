@@ -9,6 +9,9 @@ def login_user(*, request, email: str, password: str):
     if not user:
         raise AuthenticationFailed('Invalid credentials.')
 
+    if not user.is_active:
+        raise AuthenticationFailed('Account disabled.')
+
     refresh = RefreshToken.for_user(user)
 
     return {

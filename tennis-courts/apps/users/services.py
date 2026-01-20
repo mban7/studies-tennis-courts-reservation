@@ -35,14 +35,12 @@ class UserService:
 
     @staticmethod
     @transaction.atomic
-    def deactivate_user(*, user_id: UUID) -> User:
-        user = User.objects.get(id=user_id)
+    def toggle_user(*, user_id: UUID) -> User:
+        user = User.objects.select_for_update().get(id=user_id)
 
-        if not user.is_active:
-            return user
-
-        user.is_active = False
+        user.is_active = not user.is_active
         user.save(update_fields=["is_active"])
+
         return user
 
     @staticmethod
