@@ -8,7 +8,7 @@ from drf_spectacular.utils import extend_schema
 from apps.core.permissions import IsAdmin
 from apps.core.responses import api_response
 from apps.core.serializers import ApiResponseSerializer
-from apps.courts.serializers import CourtCreateSerializer, CourtReadSerializer
+from apps.courts.serializers import CourtCreateSerializer, CourtReadSerializer, CourtUpdateSerializer
 from apps.courts.services import CourtService
 
 
@@ -78,3 +78,37 @@ class CourtView(ViewSet):
             message="Court created successfully",
             status_code=status.HTTP_200_OK,
         )
+
+    @extend_schema(
+        request=CourtUpdateSerializer,
+        responses={200: ApiResponseSerializer},
+        summary="Update court",
+        tags=["courts"],
+    )
+    @action(detail=True, methods=["patch"], url_path="update")
+    def update_court(self, request, pk=None):
+        serializer = CourtUpdateSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        court = self.service.update_court(pk, serializer.validated_data)
+
+        return api_response(
+            data=CourtReadSerializer(court).data,
+            message="Court updated successfully",
+        )
+
+    @extend_schema(
+        request=None,
+        responses={200: ApiResponseSerializer},
+        summary="Toggle court activity",
+        tags=["courts"],
+    )
+    @action(detail=True, methods=["post"], url_path="toggle")
+    def toggle_court(self, request, pk=None):
+        court = self.service.toggle_court(pk)
+        return api_response(
+            data=CourtReadSerializer(court).data,
+            message="Court toggled successfully",
+        )
+
+

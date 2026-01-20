@@ -31,16 +31,20 @@ class Court(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 class CourtPrice(models.Model):
-    class Currency(models.TextChoices):
-        PLN = 'PLN', 'PLN'
-        EUR = 'EUR', 'Euro'
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     court = models.ForeignKey(Court, on_delete=models.PROTECT, related_name='prices')
     price_per_hour = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
-    currency = models.CharField(max_length=8, choices=Currency.choices, default=Currency.PLN)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["court"],
+                name="uniq_court_price",
+            )
+        ]
 
 
 
