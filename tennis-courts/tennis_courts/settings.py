@@ -41,9 +41,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'apps.courts',
     'apps.reservations',
-    'apps.payments',
     'apps.users',
-    'apps.admin',
     'apps.emails',
     'apps.auth_service'
 ]
