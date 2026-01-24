@@ -2,6 +2,7 @@ from uuid import UUID
 
 from django.db import transaction
 from apps.users.models import User
+from apps.emails.services import EmailService
 
 class UserService:
     @staticmethod
@@ -31,6 +32,12 @@ class UserService:
             password=password,
             **user_data
         )
+
+        try:
+            EmailService.send_welcome_email(user)
+        except Exception:
+            pass
+
         return user
 
     @staticmethod

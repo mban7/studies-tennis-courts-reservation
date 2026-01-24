@@ -18,7 +18,7 @@ class Reservation(models.Model):
     players_count = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1)]
     )
-    additional_info = models.TextField()
+    additional_info = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=10, choices=ReservationStatus.choices, default=ReservationStatus.PENDING)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     start_at = models.DateTimeField()
