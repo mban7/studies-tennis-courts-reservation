@@ -1,16 +1,14 @@
-import type { ReactNode } from 'react';
+import { Outlet } from 'react-router-dom';
+import Navbar from '@/components/common/Navbar';
 import "@/styles/index.css"
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
-export default function Layout({ children }: LayoutProps) {
+export default function MainLayout() {
   return (
-    <div className={"min-h-screen bg-background text-foreground"}>
-          <div className={"mx-auto px-4 py-8 max-w-7xl"}>
-              {children}
-          </div>
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <div className="mx-auto px-4 py-8 max-w-7xl">
+        <Outlet />
+      </div>
     </div>
   );
 }

@@ -11,7 +11,7 @@ from apps.core.serializers import ApiResponseSerializer
 from apps.reservations.serializers import (
     ReservationCreateSerializer,
     ReservationUpdateSerializer,
-    ReservationReadSerializer
+    ReservationReadSerializer,
 )
 from apps.reservations.services import ReservationService
 
@@ -55,13 +55,37 @@ class ReservationView(ViewSet):
     )
     @action(detail=False, methods=["get"], url_path="get")
     def get_reservations(self, request):
-        user_id = request.user.id if request.user.role == 'user' else None
+        user_id = request.user.id if request.user.role == "user" else None
         reservations = self.service.get_reservations(user_id=user_id)
         serializer = ReservationReadSerializer(reservations, many=True)
 
         return api_response(
             data=serializer.data,
             message="Reservations retrieved successfully",
+            status_code=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        request=None,
+        responses={200: ApiResponseSerializer},
+        summary="Get court reservations",
+        tags=["reservations"],
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="court/(?P<court_id>[^/.]+)",
+        url_name="court-reservations",
+    )
+    def get_court_reservations(self, request, court_id=None):
+        # Get all active reservations for the court (no date filter)
+        # Frontend will handle filtering by selected date
+        reservations = self.service.get_court_reservations(court_id, from_date=None)
+        serializer = ReservationReadSerializer(reservations, many=True)
+
+        return api_response(
+            data=serializer.data,
+            message="Court reservations retrieved successfully",
             status_code=status.HTTP_200_OK,
         )
 
@@ -77,8 +101,7 @@ class ReservationView(ViewSet):
         serializer.is_valid(raise_exception=True)
 
         reservation = self.service.create_reservation(
-            user_id=request.user.id,
-            reservation_data=serializer.validated_data
+            user_id=request.user.id, reservation_data=serializer.validated_data
         )
 
         return api_response(
