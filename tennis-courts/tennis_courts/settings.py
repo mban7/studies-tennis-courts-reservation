@@ -29,7 +29,7 @@ SECRET_KEY = "django-insecure-n%!2*pqx3(_ywz(qhw5(+jx0o0i&%7d1s8=*9hu56f8_38*mjm
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "drf_spectacular",
     "corsheaders",
+    "apps.core",
     "apps.courts",
     "apps.reservations",
     "apps.users",
@@ -144,7 +145,7 @@ USE_TZ = True
 
 # Email configuration
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "localhost"
+EMAIL_HOST = os.getenv("EMAIL_HOST", "mailpit")
 EMAIL_PORT = 1025
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = False
